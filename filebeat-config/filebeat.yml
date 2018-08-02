@@ -1,0 +1,9 @@
+filebeat.inputs:
+     - type: docker
+       containers:
+        path: "/var/lib/docker/containers"
+        ids:
+         - '*'
+output:
+ logstash: 
+  hosts: ["logstash:5044"]

@@ -1,0 +1,52 @@
+version: '3'
+
+networks:
+  elk:
+
+services:
+
+  elasticsearch:
+    image: elasticsearch
+    ports:
+    - 9200:9200
+    - 9300:9300
+    environment:
+      transport.host: "0.0.0.0"
+      discovery.zen.minimum_master_nodes: 1
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+    - elk
+  
+  logstash:
+    image: logstash
+    depends_on:
+    - elasticsearch
+    ports:
+    - 5044:5044
+    volumes:
+    - ./logstash-config:/config/
+    networks:
+    - elk
+    command: ["logstash", "--verbose", "-f", "/config/logstash.conf"]
+
+  kibana:
+    image: kibana
+    depends_on:
+    - elasticsearch
+    ports:
+    - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    networks:
+    - elk
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.3.2
+    depends_on:
+    - logstash
+    user: root
+    volumes:
+    - /var/lib/docker/containers:/var/lib/docker/containers
+    - ./filebeat-config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    networks:
+    - elk

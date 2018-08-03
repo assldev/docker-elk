@@ -24,7 +24,8 @@ services:
     ports:
     - 5044:5044
     volumes:
-    - ./logstash-config:/config/
+    - ./logstash-config/logstash.conf:/config/logstash.conf
+    - ./logstash-config/log4j2.properties:/config/log4j2.properties
     networks:
     - elk
     command: ["logstash", "--verbose", "-f", "/config/logstash.conf"]
@@ -48,6 +49,7 @@ services:
     volumes:
     - /var/lib/docker/containers:/var/lib/docker/containers
     - ./filebeat-config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    - ./elasticsearch-config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
     networks:
     - elk
     command: ["filebeat", "-strict.perms=false"]
